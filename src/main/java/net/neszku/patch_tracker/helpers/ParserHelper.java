@@ -1,6 +1,5 @@
 package net.neszku.patch_tracker.helpers;
 
-import net.neszku.patch_tracker.page.IPage;
 import net.neszku.patch_tracker.page.IPageCluster;
 import net.neszku.patch_tracker.page.impl.PageClusterImpl;
 import net.neszku.patch_tracker.page.impl.PageImpl;
@@ -19,6 +18,7 @@ public class ParserHelper {
     private static final int CHUNK_SIZE = 1600;
     private static final int MAX_LOOK_BEHIND_FOR_LINE_BREAK = 50;
 
+    // do not ask
     public static IPageCluster<String> chunk(String s) {
         IPageCluster<String> pages = new PageClusterImpl<>();
         int chunksSize = (int) Math.ceil((double) s.length() / CHUNK_SIZE);

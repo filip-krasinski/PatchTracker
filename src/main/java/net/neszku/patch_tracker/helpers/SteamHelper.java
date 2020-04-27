@@ -15,9 +15,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SteamHelper {
 
+    private static final String CLANS_URL = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/clans";
+    private static final Pattern BANNER_PATTERN = Pattern.compile("\\[img]\\{STEAM_CLAN_IMAGE}(.*?)\\[/img]");
     private static final String URL_APPS = "http://api.steampowered.com/ISteamApps/GetAppList/v0002/";
     private static final String URL_LOGO = "https://steamcdn-a.akamaihd.net/steam/apps/${APPID}/logo.png";
     private static final Map<Integer, String> APPS = new HashMap<>();
@@ -64,6 +68,14 @@ public class SteamHelper {
         }
 
         return games;
+    }
+
+    public static String extractBanner(String rawContent) {
+        Matcher matcher = BANNER_PATTERN.matcher(rawContent);
+        if (matcher.find()) {
+            return CLANS_URL + matcher.group(1);
+        }
+        return null;
     }
 
 }
