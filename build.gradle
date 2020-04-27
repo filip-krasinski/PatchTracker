@@ -1,0 +1,46 @@
+apply plugin: 'java'
+group 'net.neszku'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+compileJava.options.encoding = 'UTF-8'
+
+repositories {
+    jcenter()
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile ('net.dv8tion:JDA:4.1.1_137') {
+        exclude module: 'opus-java'
+    }
+
+    compile group: 'org.json',  name: 'json',  version: '20190722'
+
+    compile group: 'info.debatty', name: 'java-string-similarity', version: '1.2.1'
+
+    //mysql
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.4.2'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.18'
+
+// https://mvnrepository.com/artifact/org.tinylog/slf4j-binding
+    compile group: 'org.tinylog', name: 'slf4j-binding', version: '1.3.6'
+
+}
+
+jar {
+    baseName("${project.name}")
+    manifest {
+        attributes 'Main-Class': 'net.neszku.patch_tracker.PatchTracker'
+        attributes 'Implementation-Version': project.version
+    }
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}

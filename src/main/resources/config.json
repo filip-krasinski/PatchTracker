@@ -1,0 +1,12 @@
+{
+  "BOT_TOKEN": "",
+  "COMMAND_PREFIX": ".",
+  "MYSQL": {
+    "HOST": "localhost",
+    "PORT": 3306,
+    "BASE": "bot",
+    "USER": "root",
+    "PASS": "",
+    "USE_SSL": true
+  }
+}
