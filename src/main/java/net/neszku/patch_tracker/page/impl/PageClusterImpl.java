@@ -32,7 +32,7 @@ public class PageClusterImpl<V> implements IPageCluster<V> {
 
     @Override
     public IPage<V> nextPage() {
-        if (!hasPreviousPage()) {
+        if (!hasNextPage()) {
             throw new IllegalStateException("Tried to access page that doesn't exist");
         }
         return cluster.get(++cursor);

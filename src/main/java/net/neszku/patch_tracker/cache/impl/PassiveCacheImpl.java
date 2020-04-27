@@ -50,7 +50,7 @@ public class PassiveCacheImpl<K, V> implements IPassiveCache<K, V> {
         if (val == null) {
             V loaded = loader.load(k);
             if (loaded != null) {
-                map.put(k, map.put(k, new PassiveCacheEntry<>(loaded, System.currentTimeMillis() + accessExpiration)));
+                map.put(k, new PassiveCacheEntry<>(loaded, System.currentTimeMillis() + accessExpiration));
                 return loaded;
             }
         }

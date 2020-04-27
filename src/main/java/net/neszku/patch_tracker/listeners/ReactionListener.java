@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.neszku.patch_tracker.Emote;
 import net.neszku.patch_tracker.PatchTracker;
 import net.neszku.patch_tracker.page.IPageCluster;
+import org.pmw.tinylog.Logger;
 
 public class ReactionListener extends ListenerAdapter {
 
@@ -74,6 +75,7 @@ public class ReactionListener extends ListenerAdapter {
                 cluster.previousPage();
             }
 
+            Logger.info("{} | {} | {} | {}", mess, embed, cluster, hashcode);
             mess.editMessage(edit(embed, cluster, hashcode)).queue();
         });
     }
@@ -83,7 +85,7 @@ public class ReactionListener extends ListenerAdapter {
                 .setColor(embed.getColor())
                 .setDescription(cluster.getCurrentPage().getData())
                 .setThumbnail(embed.getThumbnail().getUrl())
-                .setImage(embed.getImage().getUrl())
+                .setImage(embed.getImage() == null ? null : embed.getImage().getUrl())
                 .setTitle(embed.getTitle(), embed.getUrl())
                 .setFooter(String.format("Page %s / %s | %s |",
                         cluster.getCurrentIndex() + 1,
