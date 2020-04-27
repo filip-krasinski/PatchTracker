@@ -2,6 +2,7 @@ package net.neszku.patch_tracker.command.impl;
 
 import net.neszku.patch_tracker.command.Command;
 import net.neszku.patch_tracker.command.ICommandService;
+import org.pmw.tinylog.Logger;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ public class CommandServiceImpl implements ICommandService {
 
     @Override
     public void registerCommand(Command command) {
+        Logger.info("\tRegistering command '{}'", command.getName());
         commands.add(command);
     }
 }

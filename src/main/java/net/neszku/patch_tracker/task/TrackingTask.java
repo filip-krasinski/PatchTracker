@@ -80,7 +80,7 @@ public class TrackingTask implements Runnable {
 
                     channel.sendMessage(print(patch, game, cluster))
                         .queue(message -> {
-                            if (!cluster.isEmpty()) {
+                            if (cluster.size() > 1) {
                                 message.addReaction(Emote.LEFT.asSnowflake()).queue();
                                 message.addReaction(Emote.RIGHT.asSnowflake()).queue();
                                 patchService.getCache().add(
@@ -104,12 +104,12 @@ public class TrackingTask implements Runnable {
                 .setImage(patch.getBannerURL())
                 .setTitle(patch.getTitle(), patch.getURL())
                 .setFooter(
-                        String.format("Page %s / %s | %s |",
-                                cluster.getCurrentIndex() + 1,
-                                cluster.size(),
-                                patch.toHashCode()
-                        ),
-                        instance.getShardManager().getShards().get(0).getSelfUser().getAvatarUrl()
+                    String.format("Page %s / %s | %s |",
+                        cluster.getCurrentIndex() + 1,
+                        cluster.size(),
+                        patch.toHashCode()
+                    ),
+                    instance.getShardManager().getShards().get(0).getSelfUser().getAvatarUrl()
                 ).setTimestamp(patch.getPublicationDate())
                 .build();
     }

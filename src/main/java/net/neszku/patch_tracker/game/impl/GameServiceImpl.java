@@ -29,7 +29,7 @@ public class GameServiceImpl implements IGameService {
 
     @Override
     public void registerGame(Game game) {
-        Logger.info("Registering game '{}'", game.getFullName());
+        Logger.info("\tRegistering game '{}'", game.getFullName());
         games.add(game);
     }
 }

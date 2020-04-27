@@ -23,7 +23,22 @@ public class Reflections {
      * @return set of instantiated classes
      */
     public static <T> Set<T> getAndInstantiate(String packageName, Class<T> subtype) {
-        return getClassesInPackage(packageName).stream()
+        return getAndInstantiate(packageName, subtype, null);
+    }
+
+    /**
+     * Gets the classes contained in certain package
+     * that are subtypes of provided class and then
+     * tries to instantiate it
+     *
+     * @param packageName - package to look from
+     * @param subtype - the subtype class to match
+     * @param filter - the filter
+     * @throws IllegalStateException if failed to instantiate class
+     * @return set of instantiated classes
+     */
+    public static <T> Set<T> getAndInstantiate(String packageName, Class<T> subtype, ClassFilter filter) {
+        return getClassesInPackage(packageName, filter).stream()
                 .filter(subtype::isAssignableFrom)
                 .filter(clazz -> !clazz.equals(subtype))
                 .map(clazz -> {
@@ -39,29 +54,13 @@ public class Reflections {
 
     /**
      * Lists .class files contained in certain package
-     * that are subtypes of provided class
-     *
-     * @param packageName - package to look from
-     * @param subtype - the subtype class to match
-     * @return list of .class files
-     */
-    public static <T> Set<Class<? extends T>> getSubtypesOf(String packageName, Class<T> subtype) {
-        return getClassesInPackage(packageName).stream()
-                .filter(subtype::isAssignableFrom)
-                .filter(clazz -> !clazz.equals(subtype))
-                .map(clazz -> (Class<? extends T>) clazz)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    /**
-     * Lists .class files contained in certain package
      *
      * @param packageName - package to look from
      * @return list of .class files
      */
-    public static Set<Class<?>> getClassesInPackage(String packageName) {
+    public static Set<Class<?>> getClassesInPackage(String packageName, ClassFilter filter) {
         Set<Class<?>> classes = new HashSet<>();
-        String path = packageName.replace(".", File.pathSeparator);
+        String path = packageName.replace(".", "/");
         File jar = new File(Reflections.class.getProtectionDomain().getCodeSource().getLocation().getFile());
 
         try (JarInputStream stream = new JarInputStream(new FileInputStream(jar))) {
@@ -73,7 +72,16 @@ public class Reflections {
                 if (name.endsWith(".class") && name.contains(path)) {
                     String classPath = name.substring(0, entry.getName().length() - ".class".length())
                             .replaceAll("[|/]", ".");
-                    classes.add(Class.forName(classPath));
+
+                    Class<?> clazz = Class.forName(classPath);
+                    if (filter == null) {
+                        classes.add(clazz);
+                        continue;
+                    }
+
+                    if (!filter.isFiltered(clazz)) {
+                        classes.add(clazz);
+                    }
                 }
 
             }

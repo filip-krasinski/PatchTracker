@@ -13,8 +13,10 @@ import net.neszku.patch_tracker.database.impl.Database;
 import net.neszku.patch_tracker.game.Game;
 import net.neszku.patch_tracker.game.IGameService;
 import net.neszku.patch_tracker.game.impl.GameServiceImpl;
+import net.neszku.patch_tracker.game.impl.SteamGame;
 import net.neszku.patch_tracker.helpers.IOHelper;
 import net.neszku.patch_tracker.helpers.Reflections;
+import net.neszku.patch_tracker.helpers.ClassFilter;
 import net.neszku.patch_tracker.helpers.SteamHelper;
 import net.neszku.patch_tracker.listeners.CommandListener;
 import net.neszku.patch_tracker.listeners.ReactionListener;
@@ -61,8 +63,10 @@ public class PatchTracker {
                 .forEach(commandService::registerCommand);
 
         LOGGER.info("Loading games...");
-        Reflections.getAndInstantiate(PatchTrackerConstants.GAMES_PACKAGE, Game.class)
+        ClassFilter filter = new ClassFilter().exclude(SteamGame.class);
+        Reflections.getAndInstantiate(PatchTrackerConstants.GAMES_PACKAGE, Game.class, filter)
                 .forEach(gameService::registerGame);
+
         SteamHelper.loadSteamGames()
                 .forEach(gameService::registerGame);
 

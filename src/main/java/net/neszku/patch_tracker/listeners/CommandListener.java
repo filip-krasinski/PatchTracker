@@ -56,6 +56,7 @@ public class CommandListener extends ListenerAdapter {
         Command command = commandService.getCommand(rawParts[0].substring(Config.COMMAND_PREFIX.length()));
 
         if (command == null) {
+            System.out.println("null");
             return;
         }
 

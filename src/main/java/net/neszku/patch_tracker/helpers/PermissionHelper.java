@@ -22,7 +22,7 @@ public class PermissionHelper {
         Guild  guild  = channel.getGuild();
         Member member = guild.getSelfMember();
         return permissions.stream()
-                .filter(member::hasPermission)
+                .filter(permission -> !member.hasPermission(permission))
                 .collect(Collectors.toSet());
     }
 

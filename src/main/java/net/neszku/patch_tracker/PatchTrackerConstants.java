@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class PatchTrackerConstants {
 
     public static final String COMMANDS_PACKAGE = "net.neszku.patch_tracker.command.impl";
-    public static final String GAMES_PACKAGE = "net.neszku.patch_tracker.game.impl";
+    public static final String GAMES_PACKAGE    = "net.neszku.patch_tracker.game.impl";
 
     public static final OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
             .followRedirects(true)

@@ -1,12 +1,15 @@
 [
   {
     "appid": 275850,
+    "name": "No Man's Sky",
     "custom_logo": "https://i.imgur.com/qlJ6Fao.png"
   },
   {
+    "name": "Green Hell",
     "appid": 815370
   },
   {
+    "name": "Dead by Daylight",
     "appid": 381210
   }
 ]
