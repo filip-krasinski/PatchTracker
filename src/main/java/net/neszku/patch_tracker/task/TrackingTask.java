@@ -29,7 +29,7 @@ public class TrackingTask implements Runnable {
 
     @Override
     public void run() {
-        PatchTracker.LOGGER.info("Checking for patches...");
+        Logger.info("Checking for patches...");
         IGameService  gameService  = instance.getGameService();
         IPatchService patchService = instance.getPatchService();
         for (Game game : gameService.getGames()) {
@@ -39,7 +39,7 @@ public class TrackingTask implements Runnable {
                 continue; //already handled
             }
 
-            PatchTracker.LOGGER.info("Found patch for game '{}' named: '{}'",
+            Logger.info("Found patch for game '{}' named: '{}'",
                 game.getFullName(),
                 patch.getTitle()
             );

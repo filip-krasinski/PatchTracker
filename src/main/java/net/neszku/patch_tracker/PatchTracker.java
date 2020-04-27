@@ -14,17 +14,16 @@ import net.neszku.patch_tracker.game.Game;
 import net.neszku.patch_tracker.game.IGameService;
 import net.neszku.patch_tracker.game.impl.GameServiceImpl;
 import net.neszku.patch_tracker.game.impl.SteamGame;
+import net.neszku.patch_tracker.helpers.ClassFilter;
 import net.neszku.patch_tracker.helpers.IOHelper;
 import net.neszku.patch_tracker.helpers.Reflections;
-import net.neszku.patch_tracker.helpers.ClassFilter;
 import net.neszku.patch_tracker.helpers.SteamHelper;
 import net.neszku.patch_tracker.listeners.CommandListener;
 import net.neszku.patch_tracker.listeners.ReactionListener;
 import net.neszku.patch_tracker.patch.IPatchService;
 import net.neszku.patch_tracker.patch.impl.PatchServiceImpl;
 import net.neszku.patch_tracker.task.TrackingTask;
-import org.slf4j.Logger;
-import org.slf4j.impl.TinylogLogger;
+import org.pmw.tinylog.Logger;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
@@ -34,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 
 public class PatchTracker {
 
-    public static final Logger LOGGER = new TinylogLogger("LOGGER");
     private static PatchTracker instance;
 
     private final ShardManager shardManager;
@@ -50,19 +48,19 @@ public class PatchTracker {
         commandService  = new CommandServiceImpl();
         executorService = Executors.newCachedThreadPool();
 
-        LOGGER.info("Saving resources...");
+        Logger.info("Saving resources...");
         IOHelper.saveResource("config.json",     new File(IOHelper.getJarDirectory(), "config.json"));
         IOHelper.saveResource("steam_apps.json", new File(IOHelper.getJarDirectory(), "steam_apps.json"));
 
-        LOGGER.info("Making tables....");
+        Logger.info("Making tables....");
         Database.INSTANCE.update(PatchTrackerConstants.CREATE_TABLE_PATCHES);
         Database.INSTANCE.update(PatchTrackerConstants.CREATE_TABLE_TRACKERS);
 
-        LOGGER.info("Loading commands...");
+        Logger.info("Loading commands...");
         Reflections.getAndInstantiate(PatchTrackerConstants.COMMANDS_PACKAGE, Command.class)
                 .forEach(commandService::registerCommand);
 
-        LOGGER.info("Loading games...");
+        Logger.info("Loading games...");
         ClassFilter filter = new ClassFilter().exclude(SteamGame.class);
         Reflections.getAndInstantiate(PatchTrackerConstants.GAMES_PACKAGE, Game.class, filter)
                 .forEach(gameService::registerGame);
@@ -70,7 +68,7 @@ public class PatchTracker {
         SteamHelper.loadSteamGames()
                 .forEach(gameService::registerGame);
 
-        LOGGER.info("Spawning shards...");
+        Logger.info("Spawning shards...");
         shardManager = DefaultShardManagerBuilder.create(
                         GatewayIntent.GUILD_MESSAGE_REACTIONS,
                         GatewayIntent.GUILD_MESSAGES,
@@ -90,7 +88,7 @@ public class PatchTracker {
                     )
                     .build();
 
-        LOGGER.info("Spawning tasks...");
+        Logger.info("Spawning tasks...");
         Executors.newScheduledThreadPool(1)
                 .scheduleAtFixedRate(new TrackingTask(this), 5, 500, TimeUnit.SECONDS);
     }
