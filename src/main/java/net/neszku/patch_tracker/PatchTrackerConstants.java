@@ -20,7 +20,7 @@ public class PatchTrackerConstants {
             .build();
 
     public static String CREATE_TABLE_PATCHES =
-            "CREATE TABLE IF NOT EXISTS PATCHES (" +
+            "CREATE TABLE IF NOT EXISTS patches (" +
             "ID INT NOT NULL AUTO_INCREMENT, " +
             "IDENTIFIER TEXT NOT NULL, " +
             "GAME TEXT, " +
@@ -33,7 +33,7 @@ public class PatchTrackerConstants {
             "PRIMARY KEY (ID)) CHARACTER SET utf8mb4";
 
     public static String CREATE_TABLE_TRACKERS =
-            "CREATE TABLE IF NOT EXISTS TRACKERS (" +
+            "CREATE TABLE IF NOT EXISTS trackers (" +
             "ID INT NOT NULL AUTO_INCREMENT, " +
             "CHANNEL_ID BIGINT, " +
             "GAME TEXT, " +

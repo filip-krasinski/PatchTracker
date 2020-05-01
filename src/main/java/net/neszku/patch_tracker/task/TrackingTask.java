@@ -30,47 +30,44 @@ public class TrackingTask implements Runnable {
     @Override
     public void run() {
         Logger.info("Checking for patches...");
-        IGameService  gameService  = instance.getGameService();
+        IGameService gameService = instance.getGameService();
         IPatchService patchService = instance.getPatchService();
         for (Game game : gameService.getGames()) {
             IPatch patch = game.getLatestPatch();
+
+            if (patch == null) {
+                continue;
+            }
 
             if (patchService.getCache().get(patch.getIdentifier()) != null) {
                 continue; //already handled
             }
 
-            Logger.info("Found patch for game '{}' named: '{}'",
-                game.getFullName(),
-                patch.getTitle()
-            );
+            Logger.info("Found patch for game '{}' named: '{}'", game.getFullName(), patch.getTitle());
 
             Database.INSTANCE.update(
-                "INSERT INTO PATCHES VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)",
-                patch.getIdentifier(),
-                game.getFullName(),
-                patch.getTitle(),
-                patch.getRawContent(),
-                patch.getURL(),
-                patch.getBannerURL(),
-                patch.getFormat().name(),
-                patch.getPublicationDate()
+                    "INSERT INTO patches VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    patch.getIdentifier(),
+                    game.getFullName(),
+                    patch.getTitle(),
+                    patch.getRawContent(),
+                    patch.getURL(),
+                    patch.getBannerURL(),
+                    patch.getFormat().name(),
+                    patch.getPublicationDate()
             );
 
-            String markdown = ParserHelper.parse(
-                patch.getFormat(),
-                Format.MARKDOWN,
-                patch.getRawContent()
-            );
+            String markdown = ParserHelper.parse(patch.getFormat(), Format.MARKDOWN, patch.getRawContent());
 
             IPageCluster<String> cluster = ParserHelper.chunk(markdown);
 
             IDatabaseResponse response = Database.INSTANCE.query(
-                "SELECT * FROM TRACKERS WHERE GAME = ?",
-                game.getFullName()
+                    "SELECT * FROM trackers WHERE GAME = ?",
+                    game.getFullName()
             );
 
             Logger.info("Pushing patch to {} channels", response.getRows().size());
-            instance.getExecutorService().submit(() -> { //so we won't be blocking this thread as it may take some time
+            instance.getExecutorService().submit(() -> { // do it in another thread
                 for (IRow row : response.getRows()) {
                     TextChannel channel = instance.getShardManager().getTextChannelById(row.getLong("CHANNEL_ID"));
 
@@ -79,16 +76,13 @@ public class TrackingTask implements Runnable {
                     }
 
                     channel.sendMessage(print(patch, game, cluster))
-                        .queue(message -> {
-                            if (cluster.size() > 1) {
-                                message.addReaction(Emote.LEFT.asSnowflake()).queue();
-                                message.addReaction(Emote.RIGHT.asSnowflake()).queue();
-                                patchService.getCache().add(
-                                    patch.getIdentifier(),
-                                    cluster
-                                );
-                            }
-                        });
+                            .queue(message -> {
+                                if (cluster.size() > 1) {
+                                    message.addReaction(Emote.LEFT.asSnowflake()).queue();
+                                    message.addReaction(Emote.RIGHT.asSnowflake()).queue();
+                                    patchService.getCache().add(patch.getIdentifier(), cluster);
+                                }
+                            });
                 }
             });
 

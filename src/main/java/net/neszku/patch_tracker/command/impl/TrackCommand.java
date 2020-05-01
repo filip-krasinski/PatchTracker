@@ -57,7 +57,7 @@ public class TrackCommand extends Command {
 
         if (isTracking(game, channel)) {
             Database.INSTANCE.update(
-                "DELETE FROM TRACKERS WHERE CHANNEL_ID = ? AND GAME = ?",
+                "DELETE FROM trackers WHERE CHANNEL_ID = ? AND GAME = ?",
                 channel.getIdLong(),
                 game.getFullName()
             );
@@ -67,7 +67,7 @@ public class TrackCommand extends Command {
         }
 
         Database.INSTANCE.update(
-            "INSERT INTO TRACKERS VALUES (DEFAULT, ?, ?, ?)",
+            "INSERT INTO trackers VALUES (DEFAULT, ?, ?, ?)",
             channel.getIdLong(),
             game.getFullName(),
             null
@@ -78,7 +78,7 @@ public class TrackCommand extends Command {
 
     private boolean isTracking(Game game, TextChannel channel) {
         return !Database.INSTANCE.query(
-                "SELECT * FROM TRACKERS WHERE CHANNEL_ID = ? AND GAME = ?",
+                "SELECT * FROM trackers WHERE CHANNEL_ID = ? AND GAME = ?",
                 channel.getId(),
                 game.getFullName()
         ).getRows().isEmpty();

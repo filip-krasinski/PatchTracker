@@ -23,7 +23,7 @@ public class PatchServiceImpl implements IPatchService {
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(key -> {
                 IDatabaseResponse response = Database.INSTANCE
-                        .query("SELECT * FROM PATCHES WHERE IDENTIFIER = ?", key);
+                        .query("SELECT * FROM patches WHERE IDENTIFIER = ?", key);
 
                 List<IRow> rows = response.getRows();
                 if (rows.isEmpty()) {

@@ -38,7 +38,8 @@ public class SteamGame extends Game {
 
     @Override
     public IPatch getLatestPatch() {
-        return getLatestPatches(1).get(0);
+        List<IPatch> latestPatches = getLatestPatches(1);
+        return latestPatches.isEmpty() ? null : latestPatches.get(0);
     }
 
     private static final Pattern PATTERN_PATCHES = Pattern.compile("data-initialEvents.*=.*\"(.*?)\".*data-appcapsulestore");
@@ -83,7 +84,7 @@ public class SteamGame extends Game {
             return StreamSupport.stream(events.spliterator(), false)
                     .map(JSONObject.class::cast)
                     .filter(obj -> isPatch(obj.getInt("event_type")))
-                    .limit(howMany)
+                    .limit(howMany) //news are ordered so we dont need to sort them
                     .map(obj -> {
                         JSONObject ann = obj.getJSONObject("announcement_body");
                         return PatchBuilderImpl.newBuilder()
