@@ -6,7 +6,11 @@ import java.time.LocalDateTime;
 
 public interface IPatchBuilder {
 
-    URLBuilder game(Game game);
+    IdentifierBuilder game(Game game);
+
+    interface IdentifierBuilder {
+        URLBuilder identifier(String identifier);
+    }
 
     interface URLBuilder {
         TitleBuilder url(String url);

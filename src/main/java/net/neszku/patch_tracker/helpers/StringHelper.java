@@ -61,4 +61,14 @@ public class StringHelper {
                 .map(AbstractMap.SimpleEntry::getKey)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    public static LinkedHashSet<String> sortBySimilarity(String src, Collection<String> strings, double below) {
+        Cosine d = new Cosine();
+        return strings.stream()
+                .map(str -> new AbstractMap.SimpleEntry<>(str, d.distance(src.toLowerCase(), str.toLowerCase())))
+                .sorted(Comparator.comparingDouble(AbstractMap.SimpleEntry::getValue))
+                .filter(entry -> entry.getValue() <= below)
+                .map(AbstractMap.SimpleEntry::getKey)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
 }

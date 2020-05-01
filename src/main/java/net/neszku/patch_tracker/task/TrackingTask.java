@@ -35,7 +35,7 @@ public class TrackingTask implements Runnable {
         for (Game game : gameService.getGames()) {
             IPatch patch = game.getLatestPatch();
 
-            if (patchService.getCache().get(patch.toHashCode()) != null) {
+            if (patchService.getCache().get(patch.getIdentifier()) != null) {
                 continue; //already handled
             }
 
@@ -46,7 +46,7 @@ public class TrackingTask implements Runnable {
 
             Database.INSTANCE.update(
                 "INSERT INTO PATCHES VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)",
-                patch.toHashCode(),
+                patch.getIdentifier(),
                 game.getFullName(),
                 patch.getTitle(),
                 patch.getRawContent(),
@@ -57,9 +57,9 @@ public class TrackingTask implements Runnable {
             );
 
             String markdown = ParserHelper.parse(
-                    patch.getFormat(),
-                    Format.MARKDOWN,
-                    patch.getRawContent()
+                patch.getFormat(),
+                Format.MARKDOWN,
+                patch.getRawContent()
             );
 
             IPageCluster<String> cluster = ParserHelper.chunk(markdown);
@@ -84,7 +84,7 @@ public class TrackingTask implements Runnable {
                                 message.addReaction(Emote.LEFT.asSnowflake()).queue();
                                 message.addReaction(Emote.RIGHT.asSnowflake()).queue();
                                 patchService.getCache().add(
-                                    patch.toHashCode(),
+                                    patch.getIdentifier(),
                                     cluster
                                 );
                             }
@@ -98,18 +98,16 @@ public class TrackingTask implements Runnable {
 
     private MessageEmbed print(IPatch patch, Game game, IPageCluster<String> cluster) {
         return new EmbedBuilder()
-                .setColor(Color.MAGENTA)
+                .setColor(Color.PINK)
                 .setDescription(cluster.getCurrentPage().getData())
                 .setThumbnail(game.getLogo())
                 .setImage(patch.getBannerURL())
                 .setTitle(patch.getTitle(), patch.getURL())
-                .setFooter(
-                    String.format("Page %s / %s | %s |",
+                .setFooter(String.format("Page %s / %s",
                         cluster.getCurrentIndex() + 1,
-                        cluster.size(),
-                        patch.toHashCode()
-                    ),
-                    instance.getShardManager().getShards().get(0).getSelfUser().getAvatarUrl()
+                        cluster.size()),
+                        instance.getShardManager().getShards().get(0).getSelfUser().getAvatarUrl() +
+                        "?" + patch.getIdentifier() //hidden identifier D:
                 ).setTimestamp(patch.getPublicationDate())
                 .build();
     }

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public class PatchImpl implements IPatch {
 
     private final Game game;
+    private final String identifier;
     private final String url;
     private final String title;
     private final String bannerURL;
@@ -18,6 +19,7 @@ public class PatchImpl implements IPatch {
 
     public PatchImpl(PatchBuilderImpl builder) {
         this.game = builder.game;
+        this.identifier = builder.identifier;
         this.url = builder.url;
         this.title = builder.title;
         this.bannerURL = builder.bannerURL;
@@ -29,6 +31,11 @@ public class PatchImpl implements IPatch {
     @Override
     public Game getGame() {
         return game;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return identifier;
     }
 
     @Override

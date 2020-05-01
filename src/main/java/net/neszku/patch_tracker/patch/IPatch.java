@@ -3,7 +3,6 @@ package net.neszku.patch_tracker.patch;
 import net.neszku.patch_tracker.game.Game;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 public interface IPatch {
 
@@ -13,6 +12,13 @@ public interface IPatch {
      * @return {@link Game} patch belongs to
      */
     Game getGame();
+
+    /**
+     * Gets the identifier of this patch
+     *
+     * @return identifier of this patch
+     */
+    String getIdentifier();
 
     /**
      * Gets the url to this patch
@@ -55,10 +61,5 @@ public interface IPatch {
      * @return {@link LocalDateTime} publication date
      */
     LocalDateTime getPublicationDate();
-
-
-    default int toHashCode() {
-        return Objects.hash(getTitle(), getRawContent());
-    }
 
 }

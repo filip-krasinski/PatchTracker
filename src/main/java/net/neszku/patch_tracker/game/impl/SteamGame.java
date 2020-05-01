@@ -16,9 +16,12 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class SteamGame extends Game {
 
@@ -38,19 +41,20 @@ public class SteamGame extends Game {
         return getLatestPatches(1).get(0);
     }
 
+    private static final Pattern PATTERN_PATCHES = Pattern.compile("data-initialEvents.*=.*\"(.*?)\".*data-appcapsulestore");
+    private static final String URL_DIRECT_PATCH = "https://store.steampowered.com/newshub/app/582010/view/${GID}";
+
     @Override
     public List<IPatch> getLatestPatches(int howMany) {
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
-                .host("api.steampowered.com")
-                .addEncodedPathSegments("ISteamNews/GetNewsForApp/v2/")
-                .addQueryParameter("appid", String.valueOf(appId))
-                .addQueryParameter("feeds", "steam_community_announcements")
-                .addQueryParameter("format", "json")
-                .addQueryParameter("count", String.valueOf(howMany))
+                .host("store.steampowered.com")
+                .addEncodedPathSegments("newshub/app/")
+                .addPathSegment(String.valueOf(appId))
                 .build();
 
         Request request = new Request.Builder()
+                .header("User-Agent", "Mozilla/5.0")
                 .url(url)
                 .get()
                 .build();
@@ -63,38 +67,46 @@ public class SteamGame extends Game {
                 throw new IOException("Body is null");
             }
 
-            JSONObject responseObject = new JSONObject(body.string());
-            JSONArray patchesArray = responseObject.getJSONObject("appnews")
-                    .getJSONArray("newsitems");
-
-            List<IPatch> patches = new ArrayList<>();
-            for (int i = 0; i < patchesArray.length(); i++) {
-                JSONObject patchObject = patchesArray.getJSONObject(i);
-                String title = patchObject.getString("title");
-                String directUrl = patchObject.getString("url");
-                String content = patchObject.getString("contents");
-                LocalDateTime date = LocalDateTime.ofEpochSecond(patchObject.getLong("date"), 0, ZoneOffset.UTC);
-                String banner = SteamHelper.extractBanner(content);
-
-                IPatch patch = PatchBuilderImpl.newBuilder()
-                        .game(this)
-                        .url(directUrl)
-                        .title(title)
-                        .rawContent(content)
-                        .format(Format.BBCODE)
-                        .bannerURL(banner)
-                        .publicationDate(date);
-
-                patches.add(patch);
+            String html = body.string();
+            Matcher matcher = PATTERN_PATCHES.matcher(html);
+            if (!matcher.find()) {
+                return Collections.emptyList();
             }
 
-            return patches;
+            String jsonString = matcher.group(1)
+                    .replace("&quot", "\"")
+                    .replace("\";", "\"");
+
+            JSONArray events = new JSONObject(jsonString)
+                    .getJSONArray("events");
+
+            return StreamSupport.stream(events.spliterator(), false)
+                    .map(JSONObject.class::cast)
+                    .filter(obj -> isPatch(obj.getInt("event_type")))
+                    .limit(howMany)
+                    .map(obj -> {
+                        JSONObject ann = obj.getJSONObject("announcement_body");
+                        return PatchBuilderImpl.newBuilder()
+                                .game(this)
+                                .identifier(obj.getString("gid"))
+                                .url(URL_DIRECT_PATCH.replace("${GID}", obj.getString("gid")))
+                                .title(obj.getString("event_name"))
+                                .rawContent(ann.getString("body"))
+                                .format(Format.BBCODE)
+                                .bannerURL(SteamHelper.extractBanner(ann.getString("body")))
+                                .publicationDate(LocalDateTime.ofEpochSecond(ann.getLong("posttime"), 0, ZoneOffset.UTC));
+                    })
+                    .collect(Collectors.toList());
+
         }
         catch (IOException e) {
             e.printStackTrace();
         }
 
-
         return Collections.emptyList();
+    }
+
+    private boolean isPatch(int event) {
+        return event == 12 || event == 13 || event == 14;
     }
 }

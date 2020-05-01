@@ -22,7 +22,7 @@ public class PatchTrackerConstants {
     public static String CREATE_TABLE_PATCHES =
             "CREATE TABLE IF NOT EXISTS PATCHES (" +
             "ID INT NOT NULL AUTO_INCREMENT, " +
-            "HASHCODE INT NOT NULL, " +
+            "IDENTIFIER TEXT NOT NULL, " +
             "GAME TEXT, " +
             "TITLE TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, " +
             "RAW_CONTENT MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, " +
@@ -39,5 +39,4 @@ public class PatchTrackerConstants {
             "GAME TEXT, " +
             "SUBSCRIBED_AT TIMESTAMP NOT NULL, " +
             "PRIMARY KEY (ID))";
-
 }

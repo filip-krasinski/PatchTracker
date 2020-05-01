@@ -5,6 +5,6 @@ import net.neszku.patch_tracker.page.IPageCluster;
 
 public interface IPatchService {
 
-    IPassiveCache<Integer, IPageCluster<String>> getCache();
+    IPassiveCache<String, IPageCluster<String>> getCache();
 
 }

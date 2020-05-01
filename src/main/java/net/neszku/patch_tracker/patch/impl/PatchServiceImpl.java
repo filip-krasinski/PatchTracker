@@ -18,12 +18,12 @@ import java.util.concurrent.TimeUnit;
 
 public class PatchServiceImpl implements IPatchService {
 
-    public final IPassiveCache<Integer, IPageCluster<String>> patchesCache = PassiveCacheBuilderImpl.newBuilder()
+    public final IPassiveCache<String, IPageCluster<String>> patchesCache = PassiveCacheBuilderImpl.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES)
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(key -> {
                 IDatabaseResponse response = Database.INSTANCE
-                        .query("SELECT * FROM PATCHES WHERE HASHCODE = ?", key);
+                        .query("SELECT * FROM PATCHES WHERE IDENTIFIER = ?", key);
 
                 List<IRow> rows = response.getRows();
                 if (rows.isEmpty()) {
@@ -36,6 +36,7 @@ public class PatchServiceImpl implements IPatchService {
                 IGameService gameService = instance.getGameService();
                 IPatch patch = PatchBuilderImpl.newBuilder()
                         .game(gameService.getGame(row.getString("GAME")))
+                        .identifier(row.getString("IDENTIFIER"))
                         .url(row.getString("URL"))
                         .title(row.getString("TITLE"))
                         .rawContent(row.getString("RAW_CONTENT"))
@@ -53,7 +54,7 @@ public class PatchServiceImpl implements IPatchService {
             });
 
     @Override
-    public IPassiveCache<Integer, IPageCluster<String>> getCache() {
+    public IPassiveCache<String, IPageCluster<String>> getCache() {
         return patchesCache;
     }
 }

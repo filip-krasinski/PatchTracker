@@ -64,7 +64,6 @@ public class PatchTracker {
         ClassFilter filter = new ClassFilter().exclude(SteamGame.class);
         Reflections.getAndInstantiate(PatchTrackerConstants.GAMES_PACKAGE, Game.class, filter)
                 .forEach(gameService::registerGame);
-
         SteamHelper.loadSteamGames()
                 .forEach(gameService::registerGame);
 
@@ -90,7 +89,8 @@ public class PatchTracker {
 
         Logger.info("Spawning tasks...");
         Executors.newScheduledThreadPool(1)
-                .scheduleAtFixedRate(new TrackingTask(this), 5, 500, TimeUnit.SECONDS);
+            .scheduleAtFixedRate(new TrackingTask(this), 3, 300, TimeUnit.SECONDS);
+
     }
 
     public static void main(String[] args) throws LoginException {

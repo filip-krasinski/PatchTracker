@@ -13,9 +13,21 @@ import java.util.regex.Pattern;
 
 public class SteamHelper {
 
-    private static final String CLANS_URL = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/clans";
     private static final Pattern BANNER_PATTERN = Pattern.compile("\\[img]\\{STEAM_CLAN_IMAGE}(.*?)\\[/img]");
+    private static final String URL_CLANS = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/clans";
     private static final String URL_LOGO = "https://steamcdn-a.akamaihd.net/steam/apps/${APPID}/logo.png";
+
+    public static String extractBanner(String rawContent) {
+        Matcher matcher = BANNER_PATTERN.matcher(rawContent);
+        if (matcher.find()) {
+            return URL_CLANS + matcher.group(1);
+        }
+        return null;
+    }
+
+    public static String getDefaultLogo(int appid) {
+        return URL_LOGO.replace("${APPID}", String.valueOf(appid));
+    }
 
     public static Set<Game> loadSteamGames() {
         Set<Game> games = new HashSet<>();
@@ -32,14 +44,6 @@ public class SteamHelper {
         }
 
         return games;
-    }
-
-    public static String extractBanner(String rawContent) {
-        Matcher matcher = BANNER_PATTERN.matcher(rawContent);
-        if (matcher.find()) {
-            return CLANS_URL + matcher.group(1);
-        }
-        return null;
     }
 
 }

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 public class PatchBuilderImpl implements
         IPatchBuilder,
+        IPatchBuilder.IdentifierBuilder,
         IPatchBuilder.URLBuilder,
         IPatchBuilder.TitleBuilder,
         IPatchBuilder.ContentBuilder,
@@ -25,6 +26,7 @@ public class PatchBuilderImpl implements
     }
 
     protected Game game;
+    protected String identifier;
     protected String url;
     protected String title;
     protected String rawContent;
@@ -33,8 +35,14 @@ public class PatchBuilderImpl implements
     protected LocalDateTime publicationDate;
 
     @Override
-    public URLBuilder game(Game game) {
+    public IdentifierBuilder game(Game game) {
         this.game = game;
+        return this;
+    }
+
+    @Override
+    public URLBuilder identifier(String identifier) {
+        this.identifier = identifier;
         return this;
     }
 

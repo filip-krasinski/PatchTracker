@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.neszku.patch_tracker.Emote;
 import net.neszku.patch_tracker.PatchTracker;
 import net.neszku.patch_tracker.page.IPageCluster;
-import org.pmw.tinylog.Logger;
 
 public class ReactionListener extends ListenerAdapter {
 
@@ -28,8 +27,6 @@ public class ReactionListener extends ListenerAdapter {
             return;
         }
 
-        event.getReaction().removeReaction(event.getUser()).queue();
-
         TextChannel channel = event.getTextChannel();
         channel.retrieveMessageById(event.getMessageId()).queue(mess -> {
             if (!mess.getAuthor().equals(instance.getShardManager().getShards().get(0).getSelfUser())) {
@@ -41,17 +38,20 @@ public class ReactionListener extends ListenerAdapter {
             }
 
             MessageEmbed embed = mess.getEmbeds().get(0);
-            if (embed.getFooter() == null || embed.getFooter().getText() == null) {
+            MessageEmbed.Footer footer = embed.getFooter();
+            if (footer == null || footer.getText() == null) {
                 return;
             }
 
+            event.getReaction().removeReaction(event.getUser()).queue();
+
             boolean isRight = Emote.RIGHT.getId().equals(event.getReactionEmote().getId());
             boolean isLeft  = Emote.LEFT.getId().equals(event.getReactionEmote().getId());
-            String[] parts  = embed.getFooter().getText().split("\\|");
-            String[] indexs = parts[0].substring("Page".length()).replace(" ", "").split("/");
-            int hashcode    = Integer.parseInt(parts[1].replace(" ", ""));
-            int currPage    = Integer.parseInt(indexs[0]);
-            int totalPage   = Integer.parseInt(indexs[1]);
+
+            String[] indexs   = footer.getText().substring("Page".length()).replace(" ", "").split("/");
+            String identifier = footer.getIconUrl().split("\\?")[1];
+            int currPage      = Integer.parseInt(indexs[0]);
+            int totalPage     = Integer.parseInt(indexs[1]);
 
             if (currPage == totalPage && isRight) {
                 return;
@@ -61,7 +61,7 @@ public class ReactionListener extends ListenerAdapter {
                 return;
             }
 
-            IPageCluster<String> cluster = instance.getPatchService().getCache().get(hashcode);
+            IPageCluster<String> cluster = instance.getPatchService().getCache().get(identifier);
             if (cluster == null) {
                 return;
             }
@@ -71,27 +71,24 @@ public class ReactionListener extends ListenerAdapter {
             if (isRight && cluster.hasNextPage()){
                 cluster.nextPage();
             }
-            if (isLeft && cluster.hasPreviousPage()) {
+            else if (isLeft && cluster.hasPreviousPage()) {
                 cluster.previousPage();
             }
 
-            Logger.info("{} | {} | {} | {}", mess, embed, cluster, hashcode);
-            mess.editMessage(edit(embed, cluster, hashcode)).queue();
+            mess.editMessage(edit(embed, cluster)).queue();
         });
     }
 
-    public static MessageEmbed edit(MessageEmbed embed, IPageCluster<String> cluster, int hash) {
+    public static MessageEmbed edit(MessageEmbed embed, IPageCluster<String> cluster) {
         return new EmbedBuilder()
                 .setColor(embed.getColor())
                 .setDescription(cluster.getCurrentPage().getData())
                 .setThumbnail(embed.getThumbnail().getUrl())
                 .setImage(embed.getImage() == null ? null : embed.getImage().getUrl())
                 .setTitle(embed.getTitle(), embed.getUrl())
-                .setFooter(String.format("Page %s / %s | %s |",
+                .setFooter(String.format("Page %s / %s",
                         cluster.getCurrentIndex() + 1,
-                        cluster.size(),
-                        hash
-                        ),
+                        cluster.size()),
                         embed.getFooter().getIconUrl()
                 ).setTimestamp(embed.getTimestamp())
                 .build();
